@@ -20,7 +20,7 @@ problem = mlrose.DiscreteOpt(length=len(
     init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
 
 # Define decay schedule
-schedule = mlrose.ExpDecay()
+schedule = mlrose.GeomDecay()
 
 
 class Part1():
@@ -51,22 +51,13 @@ class Part1():
             'init_state': self.init_state,
             'random_state': 1
         }
-        self._rhc('1', **default)
+        self._run(mlrose.random_hill_climb, name='1', **default)
         
-        a = _.assign({}, default, {'max_iters': 10})
-        self._rhc('a', **a)
+        A = _.assign({}, default, {'max_iters': 10})
+        self._run(mlrose.random_hill_climb, name='A', **A)
         
-        b = _.assign({}, default, {'max_iters': 20})
-        self._rhc('b', **b)
-
-
-    def _rhc(self, name = '', **kwargs):
-        print('RHC Trial %s'  %name )
-
-        best_state, best_fitness, _ = mlrose.random_hill_climb( **kwargs )
-
-        print(best_state)
-        print(best_fitness)
+        B = _.assign({}, default, {'max_iters': 20})
+        self._run(mlrose.random_hill_climb, name='B', **B)
 
     # Simulated Annealing
     def runSA(self):
@@ -78,39 +69,41 @@ class Part1():
             'init_state': self.init_state,
             'random_state': 1
         }
-
-        self._sa('1', **default)
-        
-    def _sa(self, name='', **kwargs):
-        print('SA Attempt %s' %name)
-        best_state, best_fitness, _ = mlrose.simulated_annealing(**kwargs)
-        print(best_state)
-        print(best_fitness)
+        self._run(mlrose.simulated_annealing, name='1', **default)
 
     # Genetic Algorithms
     def runGA(self):
-        default = {
+        default :  {
             'problem': self.problem, 
+            'pop_size': 200, 
+            'mutation_prob': 0.1, 
             'max_attempts': 10, 
             'max_iters': np.inf, 
-            'init_state': self.init_state,
-            'random_state': 1
+            'curve': False, 
+            'random_state': None
         }
 
-        self._ga('1', **default)
-        
+        self._run(mlrose.genetic_alg, name='1', **default)
 
-    def _ga(self, name='', **kwargs):
-        best_state, best_fitness, _ = mlrose.random_hill_climb(**kwargs)
-        print('GA Attempt 1 ')
-        print(best_state)
-        print(best_fitness)
 
     # Mimic
     def runMIMIC(self):
-        best_state, best_fitness, _ = mlrose.genetic_alg(
-            self.problem, pop_size=200, mutation_prob=0.1, max_attempts=10, max_iters=np.inf, random_state=1)
-        print('MIMIC Attempt 1 ')
+        default = {
+            'problem': self.problem, 
+            'pop_size': 200, 
+            'keep_pct': 0.2, 
+            'max_attempts':10, 
+            'max_iters': np.inf, 
+            'curve': False, 
+            'random_state': None, 
+            'fast_mimic': False
+        }
+
+        self._run(mlrose.mimic, name='1', **default)
+    
+    def _run(self, algorithm, name='', **kwargs):
+        print('%s attempt %s' %(algorithm.__name__, name))
+        best_state, best_fitness, _ = algorithm(**kwargs)
+
         print(best_state)
         print(best_fitness)
-    
