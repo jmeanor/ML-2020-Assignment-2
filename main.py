@@ -18,7 +18,7 @@ def runPart1():
                                     init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
 
     part1_1 = Part1(name='Four Peaks', fitness=fitness, problem=fourPeaksProblem, init_state=init_state)
-    # part1_1.runAll()
+    part1_1.runAll()
 
     fitness = mlrose.Queens()
     init_state = np.array([0, 1, 2, 3, 4, 5, 6, 7])

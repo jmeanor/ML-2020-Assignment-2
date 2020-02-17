@@ -62,7 +62,7 @@ class Part1():
         # print('----------------')
         # print('RunAll Result: ')
         # print(arr)
-        graph.plotPart1(arr, title=self.name)
+        graph.plotPart1(arr, title=self.name, xmax=np.max(arr[0]) + 5)
 
     # Random Hill-Climbing
     def runRHC(self):
