@@ -73,7 +73,7 @@ class Part1():
 
     # Genetic Algorithms
     def runGA(self):
-        default :  {
+        default =  {
             'problem': self.problem, 
             'pop_size': 200, 
             'mutation_prob': 0.1, 
