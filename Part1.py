@@ -95,8 +95,7 @@ class Part1():
             'max_attempts':10, 
             'max_iters': np.inf, 
             'curve': False, 
-            'random_state': None, 
-            'fast_mimic': False
+            'random_state': None
         }
 
         self._run(mlrose.mimic, name='1', **default)
