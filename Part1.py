@@ -152,7 +152,7 @@ class Part1():
             'random_state': None
         }
         # Experimental
-        problem.set_mimic_fast_mode(True)
+        self.problem.set_mimic_fast_mode(True)
 
         state, fitness, curve = self._run(mlrose.mimic, name='1', **default)
         return curve
