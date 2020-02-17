@@ -42,10 +42,6 @@ class Part1():
         # Define decay schedule
         self.schedule = schedule
 
-    # Setup
-    # def setup(self, fitness = fitness, init_state=init_state, problem=problem, schedule=schedule):
-    #     fitness = fitness
-
     # Random Hill-Climbing
     def runRHC(self):
         default = {
@@ -55,17 +51,17 @@ class Part1():
             'init_state': self.init_state,
             'random_state': 1
         }
-        self._rhc(**default)
+        self._rhc('1', **default)
         
         a = _.assign({}, default, {'max_iters': 10})
-        self._rhc(**a)
+        self._rhc('a', **a)
+        
         b = _.assign({}, default, {'max_iters': 20})
-        self._rhc(**b)
+        self._rhc('b', **b)
 
 
-
-    def _rhc(self, **kwargs):
-        print('RHC Attempt 1 ')
+    def _rhc(self, name = '', **kwargs):
+        print('RHC Trial %s'  %name )
 
         best_state, best_fitness, _ = mlrose.random_hill_climb( **kwargs )
 
@@ -74,24 +70,38 @@ class Part1():
 
     # Simulated Annealing
     def runSA(self):
-        best_state, best_fitness, _ = mlrose.simulated_annealing(self.problem, schedule=self.schedule, max_attempts=10,
-                                                                 max_iters=1000, init_state=init_state,
-                                                                 random_state=1)
-        print('SA Attempt 1 ')
-        print(best_state)
-        print(best_fitness)
+        default = {
+            'problem': self.problem, 
+            'schedule': self.schedule, 
+            'max_attempts': 10,
+            'max_iters': 1000, 
+            'init_state': self.init_state,
+            'random_state': 1
+        }
 
-        best_state, best_fitness, _ = mlrose.simulated_annealing(self.problem, schedule=self.schedule, max_attempts=10,
-                                                                 max_iters=2000, init_state=init_state,
-                                                                 random_state=1)
-        print('SA Attempt 2 ')
+        self._sa('1', **default)
+        
+    def _sa(self, name='', **kwargs):
+        print('SA Attempt %s' %name)
+        best_state, best_fitness, _ = mlrose.simulated_annealing(**kwargs)
         print(best_state)
         print(best_fitness)
 
     # Genetic Algorithms
     def runGA(self):
-        best_state, best_fitness, _ = mlrose.random_hill_climb(self.problem, max_attempts=10, max_iters=np.inf, init_state=init_state,
-                                                               random_state=1)
+        default = {
+            'problem': self.problem, 
+            'max_attempts': 10, 
+            'max_iters': np.inf, 
+            'init_state': self.init_state,
+            'random_state': 1
+        }
+
+        self._ga('1', **default)
+        
+
+    def _ga(self, name='', **kwargs):
+        best_state, best_fitness, _ = mlrose.random_hill_climb(**kwargs)
         print('GA Attempt 1 ')
         print(best_state)
         print(best_fitness)
@@ -103,3 +113,4 @@ class Part1():
         print('MIMIC Attempt 1 ')
         print(best_state)
         print(best_fitness)
+    
