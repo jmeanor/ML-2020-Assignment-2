@@ -11,15 +11,15 @@ from sklearn.metrics import accuracy_score
 
 # Initialize fitness function object using pre-defined class
 # fitness = mlrose.Queens()
-fitness = mlrose.FourPeaks(t_pct=0.15)
+# fitness = mlrose.FourPeaks(t_pct=0.15)
 
 # Solve using simulated annealing - attempt 1
 # init_state = np.array([0, 1, 2, 3, 4, 5, 6, 7])
-init_state = np.array([1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0])
+# init_state = np.array([1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0])
 
 # Define optimization problem object
-problem = mlrose.DiscreteOpt(length=len(
-    init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
+# problem = mlrose.DiscreteOpt(length=len(
+#     init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
 
 # Define decay schedule
 schedule = mlrose.GeomDecay()
@@ -29,7 +29,8 @@ class Part1():
     # Tutorial from MLRose Documentation
     # https://github.com/gkhayes/mlrose/blob/master/tutorial_examples.ipynb
 
-    def __init__(self, fitness=fitness, init_state=init_state, problem=problem, schedule=schedule):
+    def __init__(self, name, fitness, init_state, problem, schedule=schedule):
+        self.name = name
         # Initialize fitness function object using pre-defined class
         # fitness = mlrose.Queens()
         self.fitness = fitness
@@ -51,7 +52,6 @@ class Part1():
         c = np.array(self.runGA())
         d = np.array(self.runMIMIC())
         maxLen = max((len(a), len(b), len(c), len(d)))
-        print('max length: %s' %maxLen)
         arr = np.zeros((4, maxLen))
         
         arr[0, :len(a)] = a
@@ -59,10 +59,10 @@ class Part1():
         arr[2, :len(c)] = c
         arr[3, :len(d)] = d
 
-        print('----------------')
-        print('RunAll Result: ')
-        print(arr)
-        graph.plotPart1(arr, title='Four Peaks')
+        # print('----------------')
+        # print('RunAll Result: ')
+        # print(arr)
+        graph.plotPart1(arr, title=self.name)
 
     # Random Hill-Climbing
     def runRHC(self):

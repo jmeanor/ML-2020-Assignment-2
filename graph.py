@@ -4,7 +4,7 @@ matplotlib.use("macOSX")
 
 import numpy as np
 
-def plotPart1(arr, title='', xlabel='', ylabel='' ):
+def plotPart1(arr, title='', xlabel='', ylabel='', xmax=50 ):
     fig = plt.figure()
     fig.add_axes()
     ax1 = fig.add_subplot(111)

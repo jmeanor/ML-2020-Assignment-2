@@ -16,9 +16,20 @@ def runPart1():
     init_state = np.array([1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0])
     fourPeaksProblem = mlrose.DiscreteOpt(length=len(
                                     init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
-    part1 = Part1(problem=fourPeaksProblem)
 
-    part1.runAll()
+    part1_1 = Part1(name='Four Peaks', problem=fourPeaksProblem, init_state=init_state)
+    # part1_1.runAll()
+
+    fitness = mlrose.Queens()
+    init_state = np.array([0, 1, 2, 3, 4, 5, 6, 7])
+    eightQueensProblem = mlrose.DiscreteOpt(length=len(
+                                    init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
+    part1_2 = Part1(name='Eight Queens', problem=eightQueensProblem, init_state=init_state)
+    part1_2.runAll()
+
+
+    # Debug
+
     # print('Running Random Hill-Climb...\n')
     # part1.runRHC()
     # print('Running Simulated Annealing...\n')
