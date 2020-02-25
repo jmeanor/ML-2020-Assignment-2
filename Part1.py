@@ -97,19 +97,22 @@ class Part1():
         # F = _.assign({}, default, {'max_attempts': 300, 'max_iters': np.inf})
         # self._run(mlrose.random_hill_climb, name='F', **F)
 
-        rng = [5, 25, 50, 75, 100, 125, 150, 200, 225, 250, 275, 300]
-
-        for i in rng:
+        maxAttempts = [5, 25, 50, 75, 100, 125, 150, 200, 225, 250, 275, 300, 350, 400, 450, 500]
+        bestFitness = None
+        (bestState, bestCurve, bestParams) = None, None, None
+        for i in maxAttempts:
             params = _.assign({}, default, {'max_attempts': i})
             state, fitness, curve = self._run(mlrose.random_hill_climb, name='%s' %i, **params)
+            if bestFitness == None or fitness < bestFitness:
+                bestFitness = fitness
+                (bestState, bestCurve, bestParams) = state, curve, params
             if fitness == 0:
-                print('Best fitness found on iteration %s' %i)
-                print('Curve: %s' %curve)
-                print('Params: %s' %params)
                 break
-        return curve
-
-
+        
+        print('RHC - Best fitness found on max_attempt %s' %params['max_attempts'])
+        # print('Curve: %s' %curve)
+        print('RHC - Params: %s' %params)
+        return bestCurve
 
     # Simulated Annealing
     def runSA(self):
@@ -122,8 +125,23 @@ class Part1():
             'curve': True, 
             'random_state': 1
         }
-        state, fitness, curve = self._run(mlrose.simulated_annealing, name='1', **default)
-        return curve
+        # state, fitness, curve = self._run(mlrose.simulated_annealing, name='1', **default)
+
+        maxAttempts = [5, 25, 50, 75, 100, 125, 150, 200, 225, 250, 275, 300, 350, 400, 450, 500]
+        bestFitness = None
+        (bestState, bestCurve, bestParams) = None, None, None
+        for i in maxAttempts:
+            params = _.assign({}, default, {'max_attempts': i})
+            state, fitness, curve = self._run(mlrose.simulated_annealing, name='%s' %i, **params)
+            if bestFitness == None or fitness < bestFitness:
+                bestFitness = fitness
+                (bestState, bestCurve, bestParams) = state, curve, params
+            if fitness == 0:
+                break
+        print('SA - Best fitness found on max_attempt %s' %params['max_attempts'])
+        print('SA - Params: %s' %params)
+
+        return bestCurve
 
     # Genetic Algorithms
     def runGA(self):
@@ -158,11 +176,11 @@ class Part1():
         return curve
     
     def _run(self, algorithm, name='', **kwargs):
-        print('%s attempt %s' %(algorithm.__name__, name))
+        # print('%s attempt %s' %(algorithm.__name__, name))
         best_state, best_fitness, fitness_curve = algorithm(**kwargs)
 
-        print(best_state)
-        print(best_fitness)
-        print(fitness_curve)
+        # print(best_state)
+        # print(best_fitness)
+        # print(fitness_curve)
 
         return best_state, best_fitness, fitness_curve
