@@ -4,7 +4,7 @@ matplotlib.use("macOSX")
 
 import numpy as np
 
-def plotPart1(arr, title='', xlabel='', ylabel='', xmax=50 ):
+def plotPart1(arr, saveDir, title='', xlabel='', ylabel='', xmax=50):
     fig = plt.figure()
     fig.add_axes()
     ax1 = fig.add_subplot(111)
@@ -23,5 +23,6 @@ def plotPart1(arr, title='', xlabel='', ylabel='', xmax=50 ):
     ax1.set(title=title, ylabel='Fitness Error', xlabel='Iterations')
     ax1.legend(loc='best')
     plt.grid(True)
+    plt.savefig(saveDir, bbox_inches='tight')
 
-    plt.show()
+    # plt.show()

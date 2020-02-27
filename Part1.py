@@ -1,3 +1,5 @@
+import os
+from matplotlib import pyplot as plt
 import mlrose_reborn as mlrose
 import numpy as np
 import pydash as _ 
@@ -46,7 +48,7 @@ class Part1():
         self.schedule = schedule
 
     # Convenience function to run everything.
-    def runAll(self):
+    def runAll(self, savePath):
         a = np.array(self.runRHC())
         b = np.array(self.runSA())
         c = np.array(self.runGA())
@@ -62,7 +64,8 @@ class Part1():
         # print('----------------')
         # print('RunAll Result: ')
         # print(arr)
-        graph.plotPart1(arr, title=self.name, xmax=np.max(arr[0]) + 5)
+        saveDir = os.path.join(savePath, '%s.png' %self.name)
+        graph.plotPart1(arr, saveDir, title=self.name, xmax=np.max(arr[0]) + 5)
 
     # Random Hill-Climbing
     def runRHC(self):
@@ -75,43 +78,23 @@ class Part1():
             'random_state': 1
         }
 
-        # Scratchpad 
-        # init = _.assign({}, default, {'max_iters': np.inf})
-        # self._run(mlrose.random_hill_climb, name='default', **init)
-        
-        # A = _.assign({}, default, {'max_iters': 10})
-        # self._run(mlrose.random_hill_climb, name='A', **A)
-        
-        # B = _.assign({}, default, {'max_iters': 20})
-        # self._run(mlrose.random_hill_climb, name='B', **B)
-
-        # C = _.assign({}, default, {'max_iters': 30})
-        # self._run(mlrose.random_hill_climb, name='C', **C)
-
-        # D = _.assign({}, default, {'max_attempts': 100, 'max_iters': 30})
-        # self._run(mlrose.random_hill_climb, name='D', **D)
-
-        # E = _.assign({}, default, {'max_attempts': 200, 'max_iters': np.inf})
-        # self._run(mlrose.random_hill_climb, name='E', **E)
-
-        # F = _.assign({}, default, {'max_attempts': 300, 'max_iters': np.inf})
-        # self._run(mlrose.random_hill_climb, name='F', **F)
-
         maxAttempts = [5, 25, 50, 75, 100, 125, 150, 200, 225, 250, 275, 300, 350, 400, 450, 500]
+        random = [1, 19, 49, 512903123]
         bestFitness = None
         (bestState, bestCurve, bestParams) = None, None, None
         for i in maxAttempts:
-            params = _.assign({}, default, {'max_attempts': i})
-            state, fitness, curve = self._run(mlrose.random_hill_climb, name='%s' %i, **params)
-            if bestFitness == None or fitness < bestFitness:
-                bestFitness = fitness
-                (bestState, bestCurve, bestParams) = state, curve, params
-            if fitness == 0:
-                break
+            for j in random:
+                params = _.assign({}, default, {'max_attempts': i, 'random_state': j})
+                state, fitness, curve = self._run(mlrose.random_hill_climb, name='%s' %i, **params)
+                if bestFitness == None or fitness < bestFitness:
+                    bestFitness = fitness
+                    (bestState, bestCurve, bestParams) = state, curve, params
+                if fitness == 0:
+                    break
         
-        print('RHC - Best fitness found on max_attempt %s' %params['max_attempts'])
+        print('RHC - Best fitness found on max_attempt %s, random_state: %s' %(bestParams['max_attempts'], bestParams['random_state']))
         # print('Curve: %s' %curve)
-        print('RHC - Params: %s' %params)
+        # print('RHC - Params: %s' %params)
         return bestCurve
 
     # Simulated Annealing
@@ -128,18 +111,20 @@ class Part1():
         # state, fitness, curve = self._run(mlrose.simulated_annealing, name='1', **default)
 
         maxAttempts = [5, 25, 50, 75, 100, 125, 150, 200, 225, 250, 275, 300, 350, 400, 450, 500]
+        schedules = [mlrose.GeomDecay(), mlrose.ExpDecay(), mlrose.ArithDecay()]
         bestFitness = None
         (bestState, bestCurve, bestParams) = None, None, None
         for i in maxAttempts:
-            params = _.assign({}, default, {'max_attempts': i})
-            state, fitness, curve = self._run(mlrose.simulated_annealing, name='%s' %i, **params)
-            if bestFitness == None or fitness < bestFitness:
-                bestFitness = fitness
-                (bestState, bestCurve, bestParams) = state, curve, params
-            if fitness == 0:
-                break
-        print('SA - Best fitness found on max_attempt %s' %params['max_attempts'])
-        print('SA - Params: %s' %params)
+            for j in schedules:
+                params = _.assign({}, default, {'max_attempts': i, 'schedule': j}) 
+                state, fitness, curve = self._run(mlrose.simulated_annealing, name='%s' %i, **params)
+                if bestFitness == None or fitness < bestFitness:
+                    bestFitness = fitness
+                    (bestState, bestCurve, bestParams) = state, curve, params
+                if fitness == 0:
+                    break
+        # print('SA - Best fitness found on max_attempt %s' %bestParams['max_attempts'])
+        print('SA - Params: %s' %bestParams)
 
         return bestCurve
 
@@ -147,11 +132,11 @@ class Part1():
     def runGA(self):
         default =  {
             'problem': self.problem, 
-            'pop_size': 200, 
-            'mutation_prob': 0.1, 
-            'max_attempts': 10, 
-            'max_iters': np.inf, 
-            'curve': True, 
+            'pop_size': 200,
+            'mutation_prob': 0.1,
+            'max_attempts': 10,
+            'max_iters': np.inf,
+            'curve': True,
             'random_state': None
         }
 
