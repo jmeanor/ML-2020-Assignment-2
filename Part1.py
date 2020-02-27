@@ -5,11 +5,16 @@ import numpy as np
 import pydash as _ 
 
 import graph
+from pprint import pprint
 
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.metrics import accuracy_score
+
+# Logging
+import logging
+log = logging.getLogger()
 
 # Initialize fitness function object using pre-defined class
 # fitness = mlrose.Queens()
@@ -49,6 +54,8 @@ class Part1():
 
     # Convenience function to run everything.
     def runAll(self, savePath):
+        log.info('%s:' %self.name)
+
         a = np.array(self.runRHC())
         b = np.array(self.runSA())
         c = np.array(self.runGA())
@@ -79,12 +86,12 @@ class Part1():
         }
 
         maxAttempts = [5, 25, 50, 75, 100, 125, 150, 200, 225, 250, 275, 300, 350, 400, 450, 500]
-        random = [1, 19, 49, 512903123]
+        restarts = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         bestFitness = None
         (bestState, bestCurve, bestParams) = None, None, None
         for i in maxAttempts:
-            for j in random:
-                params = _.assign({}, default, {'max_attempts': i, 'random_state': j})
+            for j in restarts:
+                params = _.assign({}, default, {'max_attempts': i, 'restarts': j})
                 state, fitness, curve = self._run(mlrose.random_hill_climb, name='%s' %i, **params)
                 if bestFitness == None or fitness < bestFitness:
                     bestFitness = fitness
@@ -92,7 +99,8 @@ class Part1():
                 if fitness == 0:
                     break
         
-        print('RHC - Best fitness found on max_attempt %s, random_state: %s' %(bestParams['max_attempts'], bestParams['random_state']))
+        print('RHC - Best fitness found on max_attempts: %s restarts: %s' %(bestParams['max_attempts'], bestParams['restarts']))
+        log.info('\tRHC - Best fitness found\n\t\tmax_attempts: %s \n\t\trestarts: %s' %(bestParams['max_attempts'], bestParams['restarts']))
         # print('Curve: %s' %curve)
         # print('RHC - Params: %s' %params)
         return bestCurve
@@ -125,6 +133,7 @@ class Part1():
                     break
         # print('SA - Best fitness found on max_attempt %s' %bestParams['max_attempts'])
         print('SA - Params: %s' %bestParams)
+        log.info('\tSA - Best fitness found:\n\t\tmaxAttempts: %s \n\t\tschedule: %s' %(bestParams['max_attempts'], type(bestParams['schedule']).__name__))
 
         return bestCurve
 
@@ -140,7 +149,20 @@ class Part1():
             'random_state': None
         }
 
-        state, fitness, curve = self._run(mlrose.genetic_alg, name='1', **default)
+        mutation_prob = np.linspace(0.1, 1, 10)
+        pop_size = np.linspace(100, 500, 10)
+        bestFitness = None
+        for i in mutation_prob:
+            for j in pop_size:
+                params = _.assign({}, default, {'mutation_prob': i, 'pop_size': j}) 
+                state, fitness, curve = self._run(mlrose.genetic_alg, name='%s' %i, **params)
+                if bestFitness == None or fitness < bestFitness:
+                    bestFitness = fitness
+                    (bestState, bestCurve, bestParams) = state, curve, params
+                if fitness == 0:
+                    break
+        log.info('\tGA - Best fitness found:\n\t\tmutation_prob: %s \n\t\tpop_size: %s' %(bestParams['mutation_prob'], bestParams['pop_size']))
+
         return curve
 
     # Mimic

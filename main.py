@@ -26,6 +26,20 @@ def createDateFolder(suffix=("")):
             raise  # This was not a "directory exist" error..
     return mydir
 
+###
+#    source: My assignment 1 code
+###
+def setLog(path, oldHandler = None):
+    if oldHandler != None:
+        myLogger.logger.removeHandler(oldHandler)
+    logPath = os.path.join(path, 'metadata.txt')
+    fh = myLogger.logging.FileHandler(logPath)
+    fh.setLevel(logging.INFO)
+    fmtr = logging.Formatter('%(message)s')
+    fh.setFormatter(fmtr)
+    myLogger.logger.addHandler(fh)
+    return fh
+
 def runPart1(savePath):
     fitness = mlrose.FourPeaks(t_pct=0.15)
     init_state = np.array([1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0])
@@ -52,7 +66,6 @@ def runPart1(savePath):
 
 
     # Debug
-
     # print('Running Random Hill-Climb...\n')
     # part1.runRHC()
     # print('Running Simulated Annealing...\n')
@@ -67,5 +80,6 @@ def runPart1(savePath):
 # Main block
 timestamp = datetime.now().strftime('%b-%d-%y %I:%M:%S %p')
 path1 = createDateFolder((timestamp, "Part-1"))
+part1Handler = setLog(path1)
 
 runPart1(path1)
