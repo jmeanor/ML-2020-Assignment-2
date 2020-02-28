@@ -50,9 +50,6 @@ class Part1():
         arr[2, :len(c)] = c
         arr[3, :len(d)] = d
 
-        # print('----------------')
-        # print('RunAll Result: ')
-        # print(arr)
         saveDir = os.path.join(savePath, '%s.png' % self.name)
         graph.plotPart1(arr, saveDir, title=self.name, xmax=np.max(arr[0]) + 5)
 
@@ -67,8 +64,7 @@ class Part1():
             'random_state': 1
         }
 
-        maxAttempts = [5, 25, 50, 75, 100, 125, 150,
-                       200, 225, 250, 275, 300, 350, 400, 450, 500]
+        maxAttempts = [5, 10, 20]
         restarts = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         bestFitness = None
         (bestState, bestCurve, bestParams) = None, None, None
@@ -76,10 +72,19 @@ class Part1():
             for j in restarts:
                 params = _.assign(
                     {}, default, {'max_attempts': i, 'restarts': j})
-                state, fitness, curve = self._run(
-                    mlrose.random_hill_climb, name='%s' % i, **params)
-                if bestFitness == None or fitness < bestFitness:
-                    bestFitness = fitness
+
+                scores = []
+                for r in range(5):
+                    randomSeed = np.random.randint(0, 1000)
+                    params = _.assign(
+                        {}, params, {'random_state': randomSeed})
+                    state, fitness, curve = self._run(
+                        mlrose.random_hill_climb, name='%s' % i, **params)
+                    scores.append(fitness)
+                avgFitness = np.mean(scores)
+                
+                if bestFitness == None or avgFitness < bestFitness:
+                    bestFitness = avgFitness
                     (bestState, bestCurve, bestParams) = state, curve, params
                 # if fitness == 0:
                 #     break
@@ -103,8 +108,7 @@ class Part1():
             'random_state': 1
         }
 
-        maxAttempts = [5, 25, 50, 75, 100, 125, 150,
-                       200, 225, 250, 275, 300, 350, 400, 450, 500]
+        maxAttempts = [5, 10, 20]
         schedules = [mlrose.GeomDecay(), mlrose.ExpDecay(),
                      mlrose.ArithDecay()]
         bestFitness = None
@@ -113,13 +117,22 @@ class Part1():
             for j in schedules:
                 params = _.assign(
                     {}, default, {'max_attempts': i, 'schedule': j})
-                state, fitness, curve = self._run(
-                    mlrose.simulated_annealing, name='%s' % i, **params)
-                if bestFitness == None or fitness < bestFitness:
-                    bestFitness = fitness
+                
+                scores = []
+                for r in range(5):
+                    randomSeed = np.random.randint(0, 1000)
+                    params = _.assign(
+                        {}, params, {'random_state': randomSeed})
+                    state, fitness, curve = self._run(
+                        mlrose.simulated_annealing, name='%s' % i, **params)
+                    scores.append(fitness)
+                avgFitness = np.mean(scores)
+                
+                if bestFitness == None or avgFitness < bestFitness:
+                    bestFitness = avgFitness
                     (bestState, bestCurve, bestParams) = state, curve, params
-                if fitness == 0:
-                    break
+                # if fitness == 0:
+                #     break
         print('SA - Params: %s' % bestParams)
         log.info('\tSA - Best fitness found: %s\n\t\tmaxAttempts: %s \n\t\tschedule: %s' %
                  (bestFitness, bestParams['max_attempts'], type(bestParams['schedule']).__name__))
@@ -145,13 +158,22 @@ class Part1():
             for j in pop_size:
                 params = _.assign(
                     {}, default, {'mutation_prob': i, 'pop_size': j})
-                state, fitness, curve = self._run(
-                    mlrose.genetic_alg, name='%s' % i, **params)
-                if bestFitness == None or fitness < bestFitness:
-                    bestFitness = fitness
+
+                scores = []
+                for r in range(5):
+                    randomSeed = np.random.randint(0, 1000)
+                    params = _.assign(
+                        {}, params, {'random_state': randomSeed})
+                    state, fitness, curve = self._run(
+                        mlrose.genetic_alg, name='%s' % i, **params)
+                    scores.append(fitness)
+                avgFitness = np.mean(scores)
+
+                if bestFitness == None or avgFitness < bestFitness:
+                    bestFitness = avgFitness
                     (bestState, bestCurve, bestParams) = state, curve, params
-                if fitness == 0:
-                    break
+                # if fitness == 0:
+                #     break
         log.info('\tGA - Best fitness found: %s\n\t\tmutation_prob: %s \n\t\tpop_size: %s' %
                  (bestFitness, bestParams['mutation_prob'], bestParams['pop_size']))
 
