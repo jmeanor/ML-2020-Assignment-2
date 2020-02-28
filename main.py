@@ -1,6 +1,7 @@
 import mlrose_hiive as mlrose
 import numpy as np
-import os, errno
+import os
+import errno
 from datetime import datetime
 
 # Assignment Code
@@ -16,6 +17,8 @@ log = logging.getLogger()
 ###
 #    source: https://stackoverflow.com/questions/14115254/creating-a-folder-with-timestamp/14115286
 ###
+
+
 def createDateFolder(suffix=("")):
     mydir = os.path.join(os.getcwd(), 'output', *suffix)
     # print('mydir %s' %mydir)
@@ -29,7 +32,9 @@ def createDateFolder(suffix=("")):
 ###
 #    source: My assignment 1 code
 ###
-def setLog(path, oldHandler = None):
+
+
+def setLog(path, oldHandler=None):
     if oldHandler != None:
         myLogger.logger.removeHandler(oldHandler)
     logPath = os.path.join(path, 'metadata.txt')
@@ -40,30 +45,33 @@ def setLog(path, oldHandler = None):
     myLogger.logger.addHandler(fh)
     return fh
 
+
 def runPart1(savePath):
     fitness = mlrose.FourPeaks(t_pct=0.15)
     init_state = np.array([1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0])
     fourPeaksProblem = mlrose.DiscreteOpt(length=len(
-                                    init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
+        init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
 
-    part1_1 = Part1(name='Four Peaks', fitness=fitness, problem=fourPeaksProblem, init_state=init_state)
+    part1_1 = Part1(name='Four Peaks', fitness=fitness,
+                    problem=fourPeaksProblem, init_state=init_state)
     part1_1.runAll(savePath)
 
     fitness = mlrose.Queens()
     init_state = np.array([0, 1, 2, 3, 4, 5, 6, 7])
     eightQueensProblem = mlrose.DiscreteOpt(length=len(
-                                    init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
-    part1_2 = Part1(name='Eight Queens', fitness=fitness, problem=eightQueensProblem, init_state=init_state)
+        init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
+    part1_2 = Part1(name='Eight Queens', fitness=fitness,
+                    problem=eightQueensProblem, init_state=init_state)
     part1_2.runAll(savePath)
 
     edges = [(0, 1), (0, 2), (0, 4), (1, 3), (2, 0), (2, 3), (3, 4)]
     fitness = mlrose.MaxKColor(edges)
     init_state = np.array([0, 1, 0, 1, 1])
     eightQueensProblem = mlrose.DiscreteOpt(length=len(
-                                    init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
-    part1_3 = Part1(name='Max-K Color', fitness=fitness, problem=eightQueensProblem, init_state=init_state)
+        init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
+    part1_3 = Part1(name='Max-K Color', fitness=fitness,
+                    problem=eightQueensProblem, init_state=init_state)
     part1_3.runAll(savePath)
-
 
     # Debug
     # print('Running Random Hill-Climb...\n')
@@ -74,7 +82,6 @@ def runPart1(savePath):
     # part1.runGA()
     # print('Running MIMIC...\n')
     # part1.runMIMIC()
-
 
 
 # Main block
