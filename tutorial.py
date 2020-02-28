@@ -1,4 +1,4 @@
-import mlrose_reborn as mlrose
+import mlrose_hiive as mlrose
 import numpy as np
 
 from sklearn.datasets import load_iris

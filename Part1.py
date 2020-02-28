@@ -1,6 +1,6 @@
 import os
 from matplotlib import pyplot as plt
-import mlrose_reborn as mlrose
+import mlrose_hiive as mlrose
 import numpy as np
 import pydash as _ 
 
@@ -150,7 +150,7 @@ class Part1():
         }
 
         mutation_prob = np.linspace(0.1, 1, 10)
-        pop_size = np.linspace(100, 500, 10)
+        pop_size = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
         bestFitness = None
         for i in mutation_prob:
             for j in pop_size:

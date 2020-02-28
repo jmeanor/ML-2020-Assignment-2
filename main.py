@@ -1,4 +1,4 @@
-import mlrose_reborn as mlrose
+import mlrose_hiive as mlrose
 import numpy as np
 import os, errno
 from datetime import datetime
