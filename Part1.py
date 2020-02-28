@@ -16,21 +16,8 @@ from sklearn.metrics import accuracy_score
 import logging
 log = logging.getLogger()
 
-# Initialize fitness function object using pre-defined class
-# fitness = mlrose.Queens()
-# fitness = mlrose.FourPeaks(t_pct=0.15)
-
-# Solve using simulated annealing - attempt 1
-# init_state = np.array([0, 1, 2, 3, 4, 5, 6, 7])
-# init_state = np.array([1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0])
-
-# Define optimization problem object
-# problem = mlrose.DiscreteOpt(length=len(
-#     init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
-
 # Define decay schedule
 schedule = mlrose.GeomDecay()
-
 
 class Part1():
     # Tutorial from MLRose Documentation
@@ -38,12 +25,7 @@ class Part1():
 
     def __init__(self, name, fitness, init_state, problem, schedule=schedule):
         self.name = name
-        # Initialize fitness function object using pre-defined class
-        # fitness = mlrose.Queens()
         self.fitness = fitness
-
-        # Solve using simulated annealing - attempt 1
-        # init_state = np.array([0, 1, 2, 3, 4, 5, 6, 7])
         self.init_state = init_state
 
         # Define optimization problem object
@@ -106,8 +88,7 @@ class Part1():
               (bestParams['max_attempts'], bestParams['restarts']))
         log.info('\tRHC - Best fitness found: %s\n\t\tmax_attempts: %s \n\t\trestarts: %s' %
                  (bestFitness, bestParams['max_attempts'], bestParams['restarts']))
-        # print('Curve: %s' %curve)
-        # print('RHC - Params: %s' %params)
+        
         return bestCurve
 
     # Simulated Annealing
@@ -121,7 +102,6 @@ class Part1():
             'curve': True,
             'random_state': 1
         }
-        # state, fitness, curve = self._run(mlrose.simulated_annealing, name='1', **default)
 
         maxAttempts = [5, 25, 50, 75, 100, 125, 150,
                        200, 225, 250, 275, 300, 350, 400, 450, 500]
@@ -140,7 +120,6 @@ class Part1():
                     (bestState, bestCurve, bestParams) = state, curve, params
                 if fitness == 0:
                     break
-        # print('SA - Best fitness found on max_attempt %s' %bestParams['max_attempts'])
         print('SA - Params: %s' % bestParams)
         log.info('\tSA - Best fitness found: %s\n\t\tmaxAttempts: %s \n\t\tschedule: %s' %
                  (bestFitness, bestParams['max_attempts'], type(bestParams['schedule']).__name__))

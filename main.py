@@ -48,7 +48,8 @@ def setLog(path, oldHandler=None):
 
 def runPart1(savePath):
     fitness = mlrose.FourPeaks(t_pct=0.15)
-    init_state = np.array([1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0])
+    # init_state = np.array([1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0])
+    init_state = None
     fourPeaksProblem = mlrose.DiscreteOpt(length=len(
         init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
 
@@ -57,7 +58,8 @@ def runPart1(savePath):
     part1_1.runAll(savePath)
 
     fitness = mlrose.Queens()
-    init_state = np.array([0, 1, 2, 3, 4, 5, 6, 7])
+    # init_state = np.array([0, 1, 2, 3, 4, 5, 6, 7])
+    init_state = None
     eightQueensProblem = mlrose.DiscreteOpt(length=len(
         init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
     part1_2 = Part1(name='Eight Queens', fitness=fitness,
@@ -66,11 +68,12 @@ def runPart1(savePath):
 
     edges = [(0, 1), (0, 2), (0, 4), (1, 3), (2, 0), (2, 3), (3, 4)]
     fitness = mlrose.MaxKColor(edges)
-    init_state = np.array([0, 1, 0, 1, 1])
-    eightQueensProblem = mlrose.DiscreteOpt(length=len(
+    # init_state = np.array([0, 1, 0, 1, 1])
+    init_state = None
+    maxKColorsProblem = mlrose.DiscreteOpt(length=len(
         init_state), fitness_fn=fitness, maximize=False, max_val=len(init_state))
     part1_3 = Part1(name='Max-K Color', fitness=fitness,
-                    problem=eightQueensProblem, init_state=init_state)
+                    problem=maxKColorsProblem, init_state=init_state)
     part1_3.runAll(savePath)
 
     # Debug
