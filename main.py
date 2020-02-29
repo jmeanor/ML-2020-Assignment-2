@@ -175,14 +175,16 @@ def runPart1(savePath):
     # part1.runMIMIC()
 
 def runPart1_2(saveDir):
-    # import Part1_2
-    fitness = mlrose.FlipFlop()
-    init_state = None
-    flipFlopProblem = mlrose.DiscreteOpt(length=100,
-        fitness_fn=fitness, maximize=True, max_val=2)
-    part1_5 = Part1_2(name='Flip Flop - 100', fitness=fitness,
-                    problem=flipFlopProblem, init_state=init_state)
-    part1_5.runAll(saveDir)
+    weights = np.random.randint(2, high=20, size=100)
+    values = np.random.randint(2, high=100, size=100)
+    max_weight_pct = 0.8
+    fitness = mlrose.Knapsack(weights, values, max_weight_pct)
+    knapsackProblem = mlrose.DiscreteOpt(length=100,
+        fitness_fn=fitness, maximize=False, max_val=2)
+
+    part1_7 = Part1_2(name='Knapsack', fitness=fitness,
+                    problem=knapsackProblem, init_state=None)
+    part1_7.runAll(saveDir)
 
 # Main block
 timestamp = datetime.now().strftime('%b-%d-%y %I:%M:%S %p')
