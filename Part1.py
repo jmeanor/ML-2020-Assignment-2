@@ -19,6 +19,7 @@ log = logging.getLogger()
 # Define decay schedule
 schedule = mlrose.GeomDecay()
 
+
 class Part1():
     # Tutorial from MLRose Documentation
     # https://github.com/gkhayes/mlrose/blob/master/tutorial_examples.ipynb
@@ -30,6 +31,8 @@ class Part1():
 
         # Define optimization problem object
         self.problem = problem
+        # Infer Maxmimize or Minimize
+        self.isMaximize = (True if self.problem.get_maximize() > 0 else False)
 
         # Define decay schedule
         self.schedule = schedule
@@ -50,8 +53,13 @@ class Part1():
         arr[2, :len(c)] = c
         arr[3, :len(d)] = d
 
+        arr[0, len(a):maxLen] = a[-1]
+        arr[1, len(b):maxLen] = b[-1]
+        arr[2, len(c):maxLen] = c[-1]
+        arr[3, len(d):maxLen] = d[-1]
+
         saveDir = os.path.join(savePath, '%s.png' % self.name)
-        graph.plotPart1(arr, saveDir, title=self.name, xmax=np.max(arr[0]) + 5)
+        graph.plotPart1(arr, saveDir, title=self.name, isMaximizing=self.isMaximize, xmax=maxLen+5)
 
     # Random Hill-Climbing
     def runRHC(self):
@@ -82,8 +90,8 @@ class Part1():
                         mlrose.random_hill_climb, name='%s' % i, **params)
                     scores.append(fitness)
                 avgFitness = np.mean(scores)
-                
-                if bestFitness == None or avgFitness < bestFitness:
+
+                if bestFitness == None or (self.isMaximize and avgFitness > bestFitness) or (not self.isMaximize and avgFitness < bestFitness):
                     bestFitness = avgFitness
                     (bestState, bestCurve, bestParams) = state, curve, params
                 # if fitness == 0:
@@ -93,7 +101,7 @@ class Part1():
               (bestParams['max_attempts'], bestParams['restarts']))
         log.info('\tRHC - Best fitness found: %s\n\t\tmax_attempts: %s \n\t\trestarts: %s' %
                  (bestFitness, bestParams['max_attempts'], bestParams['restarts']))
-        
+
         return bestCurve
 
     # Simulated Annealing
@@ -102,7 +110,7 @@ class Part1():
             'problem': self.problem,
             'schedule': self.schedule,
             'max_attempts': 10,
-            'max_iters': 100,
+            'max_iters': 1000,
             'init_state': self.init_state,
             'curve': True,
             'random_state': 1
@@ -117,7 +125,7 @@ class Part1():
             for j in schedules:
                 params = _.assign(
                     {}, default, {'max_attempts': i, 'schedule': j})
-                
+
                 scores = []
                 for r in range(5):
                     randomSeed = np.random.randint(0, 1000)
@@ -127,8 +135,8 @@ class Part1():
                         mlrose.simulated_annealing, name='%s' % i, **params)
                     scores.append(fitness)
                 avgFitness = np.mean(scores)
-                
-                if bestFitness == None or avgFitness < bestFitness:
+
+                if bestFitness == None or (self.isMaximize and avgFitness > bestFitness) or (not self.isMaximize and avgFitness < bestFitness):
                     bestFitness = avgFitness
                     (bestState, bestCurve, bestParams) = state, curve, params
                 # if fitness == 0:
@@ -146,13 +154,13 @@ class Part1():
             'pop_size': 200,
             'mutation_prob': 0.1,
             'max_attempts': 10,
-            'max_iters': np.inf,
+            'max_iters': 100,
             'curve': True,
             'random_state': None
         }
 
-        mutation_prob = np.linspace(0.1, 1, 10)
-        pop_size = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
+        mutation_prob = np.linspace(0.1, 1, 5)
+        pop_size = [50,100, 200]
         bestFitness = None
         for i in mutation_prob:
             for j in pop_size:
@@ -161,6 +169,7 @@ class Part1():
 
                 scores = []
                 for r in range(5):
+                    print('Running GA %i' %r)
                     randomSeed = np.random.randint(0, 1000)
                     params = _.assign(
                         {}, params, {'random_state': randomSeed})
@@ -169,7 +178,7 @@ class Part1():
                     scores.append(fitness)
                 avgFitness = np.mean(scores)
 
-                if bestFitness == None or avgFitness < bestFitness:
+                if bestFitness == None or (self.isMaximize and avgFitness > bestFitness) or (not self.isMaximize and avgFitness < bestFitness):
                     bestFitness = avgFitness
                     (bestState, bestCurve, bestParams) = state, curve, params
                 # if fitness == 0:
@@ -177,7 +186,7 @@ class Part1():
         log.info('\tGA - Best fitness found: %s\n\t\tmutation_prob: %s \n\t\tpop_size: %s' %
                  (bestFitness, bestParams['mutation_prob'], bestParams['pop_size']))
 
-        return curve
+        return bestCurve
 
     # Mimic
     def runMIMIC(self):
@@ -194,7 +203,36 @@ class Part1():
         self.problem.set_mimic_fast_mode(True)
 
         state, fitness, curve = self._run(mlrose.mimic, name='1', **default)
-        return curve
+
+        keep_pct = np.linspace(0.1, 1, 5)
+        pop_size = [50, 100, 200]
+        bestFitness = None
+        for i in keep_pct:
+            for j in pop_size:
+                params = _.assign(
+                    {}, default, {'keep_pct': i, 'pop_size': j})
+
+                scores = []
+                for r in range(5):
+                    print('Running MIMIC %i' %r)
+                    randomSeed = np.random.randint(0, 1000)
+                    params = _.assign(
+                        {}, params, {'random_state': randomSeed})
+                    state, fitness, curve = self._run(
+                        mlrose.mimic, name='%s' % i, **params)
+                    scores.append(fitness)
+                avgFitness = np.mean(scores)
+
+                if bestFitness == None or (self.isMaximize and avgFitness > bestFitness) or (not self.isMaximize and avgFitness < bestFitness):
+                    bestFitness = avgFitness
+                    (bestState, bestCurve, bestParams) = state, curve, params
+                # if fitness == 0:
+                #     break
+        log.info('\tMIMIC - Best fitness found: %s\n\t\tkeep_pct: %s \n\t\tpop_size: %s' %
+                 (bestFitness, bestParams['keep_pct'], bestParams['pop_size']))
+        # log.info('MIMIC CURVE: %s' %bestCurve)
+
+        return bestCurve
 
     def _run(self, algorithm, name='', **kwargs):
         # print('%s attempt %s' %(algorithm.__name__, name))
