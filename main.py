@@ -6,6 +6,7 @@ from datetime import datetime
 
 # Assignment Code
 from Part1 import Part1
+from Part1_2 import Part1_2
 
 # Logging
 import myLogger
@@ -118,7 +119,7 @@ def runPart1(savePath):
     # =============================================================
     #  Source - Tutorial from MLRose Docs
     #  https://mlrose.readthedocs.io/en/stable/source/tutorial2.html
-    # 
+    
     # =============================================================
     # Create list of city coordinates
     coords_list = [(1, 1), (4, 2), (5, 2), (6, 4), (4, 4), (3, 6), (1, 5), (2, 3)]
@@ -150,7 +151,7 @@ def runPart1(savePath):
                     problem=problem_no_fit, init_state=None)
     part1_6.runAll(savePath)
 
-    # Knapsack
+    Knapsack
     weights = np.random.randint(2, high=20, size=50)
     values = np.random.randint(2, high=100, size=50)
     max_weight_pct = 0.8
@@ -173,10 +174,21 @@ def runPart1(savePath):
     # print('Running MIMIC...\n')
     # part1.runMIMIC()
 
+def runPart1_2(saveDir):
+    # import Part1_2
+    fitness = mlrose.FlipFlop()
+    init_state = None
+    flipFlopProblem = mlrose.DiscreteOpt(length=100,
+        fitness_fn=fitness, maximize=True, max_val=2)
+    part1_5 = Part1_2(name='Flip Flop - 100', fitness=fitness,
+                    problem=flipFlopProblem, init_state=init_state)
+    part1_5.runAll(saveDir)
 
 # Main block
 timestamp = datetime.now().strftime('%b-%d-%y %I:%M:%S %p')
 path1 = createDateFolder((timestamp, "Part-1"))
 part1Handler = setLog(path1)
 
-runPart1(path1)
+# runPart1(path1)
+runPart1_2(path1)
+
