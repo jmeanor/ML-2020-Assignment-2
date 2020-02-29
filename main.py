@@ -151,7 +151,7 @@ def runPart1(savePath):
                     problem=problem_no_fit, init_state=None)
     part1_6.runAll(savePath)
 
-    Knapsack
+    # Knapsack
     weights = np.random.randint(2, high=20, size=50)
     values = np.random.randint(2, high=100, size=50)
     max_weight_pct = 0.8
