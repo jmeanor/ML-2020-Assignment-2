@@ -123,7 +123,7 @@ class Part1_2():
 
         maxAttempts = [20]
         # schedules = [mlrose.GeomDecay(), mlrose.ExpDecay(), mlrose.ArithDecay()]
-        schedules = [mlrose.ExpDecay()]
+        schedules = [mlrose.GeomDecay()]
         bestFitness = None
         (bestState, bestCurve, bestParams) = None, None, None
         for i in maxAttempts:
@@ -171,8 +171,8 @@ class Part1_2():
         mutation_prob = np.linspace(0.1, 1, 5)
         pop_size = [50,100, 200]
         bestFitness = None
-        for i in [0.1]:
-            for j in [100]:
+        for i in [0.55]:
+            for j in [50]:
                 params = _.assign(
                     {}, default, {'mutation_prob': i, 'pop_size': j})
 
