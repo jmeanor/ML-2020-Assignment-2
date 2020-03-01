@@ -4,6 +4,12 @@ from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 import mlrose_hiive as mlrose
 import pandas as pd
 import numpy as np
+from sklearn.metrics import accuracy_score, confusion_matrix
+import time, os
+
+# Logging
+import logging
+log = logging.getLogger()
 
 class Part2():
 
@@ -49,39 +55,71 @@ class Part2():
         y_train_hot = one_hot.fit_transform(y_train.reshape(-1, 1)).todense()
         y_test_hot = one_hot.transform(y_test.reshape(-1, 1)).todense()
 
-        print(y_train_hot)
-        print(y_test_hot)
+        # print(len(y_train_hot))
+        # print(len(y_test_hot))
+
+        # Hyperparams
+        learning_rates = np.linspace(0.1, .5, 10) # 0.4111111111111111
+        # learning_rates = [0.4]
+        max_iters = 100
+        activation_functions = ['identity', 'relu', 'sigmoid', 'tanh']
+        hidden_layers = [5]
+        
+        # RHC
+        restarts = 8
+        # GA
+        pop_size = [50, 100, 200]
+        mutation_prob = np.linspace(0.1, 1, 5)
 
         # Initialize neural network object and fit object
         print('Training Random Hill Climb')
+        csvFile = open(os.path.join(self.savePath, 'RHC_output.csv'), 'w')
+        header = 'Algorithm, Activation Function, Learning Rate, Restarts, Hidden Layers, Training Accuracy, Testing Accuracy, Training Time\n'
+        csvFile.write(header)
 
-        nn_model1 = mlrose.NeuralNetwork(hidden_nodes = [20,20], activation = 'relu', \
-                                        algorithm = 'random_hill_climb', max_iters = 1000, \
-                                        bias = True, is_classifier = True, learning_rate = 0.0001, \
-                                        early_stopping = True, clip_max = 5, max_attempts = 100, \
-                                        random_state = 3)
+        for activation in activation_functions:
+            for learning_rate in learning_rates:
+                paramString = 'RHC, activation, %s, learning_rate, %f, restarts, 8, hidden_layers, %s' %(activation, learning_rate, hidden_layers)
+                log.info(paramString)
+                # print('Learning rate: ', learning_rate)
+                nn_model1 = mlrose.NeuralNetwork(hidden_nodes = hidden_layers, 
+                                            activation = activation, 
+                                            algorithm = 'random_hill_climb', 
+                                            restarts=restarts,
+                                            max_iters = max_iters,
+                                            bias = True, 
+                                            is_classifier = True, 
+                                            learning_rate = learning_rate, 
+                                            early_stopping = True, 
+                                            clip_max = 5,
+                                            curve=True, 
+                                            max_attempts = 100,
+                                            random_state = 3)
+                start = time.process_time()
+                nn_model1.fit(X_train_scaled, y_train_hot)
+                elapsed = time.process_time() - start
+                # log.info('\tElapsed time, %s' %elapsed)
 
-        nn_model1.fit(X_train_scaled, y_train_hot)
+                # Predict labels for train set and assess accuracy
+                y_train_pred = nn_model1.predict(X_train_scaled)
+                y_train_accuracy = accuracy_score(y_train_hot, y_train_pred)
 
-        from sklearn.metrics import accuracy_score, confusion_matrix
+                # Predict labels for test set and assess accuracy
+                y_test_pred = nn_model1.predict(X_test_scaled)
+                y_test_accuracy = accuracy_score(y_test_hot, y_test_pred)
+                # print('Test: ', y_test_accuracy)
+                log.info('\tTraining Accuracy,\t %f' %(y_train_accuracy))
+                log.info('\tTesting Accuracy,\t %f'%y_test_accuracy)
+                log.info('\tTraining Time,\t\t %f' %elapsed)
+                # 'RHC, activation, %s, learning_rate, %f, restarts, 8, hidden_layers, %s' %(activation, learning_rate, hidden_layers)
+                vals = '%s,%s,%s,%s,%s,%s,%s,%s,\n' %('RHC', activation, learning_rate, restarts, hidden_layers, y_train_accuracy, y_test_accuracy, elapsed)
+                csvFile.write(vals)
+                # confusion = confusion_matrix(y_train_hot, y_train_pred)
 
-        # Predict labels for train set and assess accuracy
-        y_train_pred = nn_model1.predict(X_train_scaled)
+        csvFile.close()
+        return
 
-        y_train_accuracy = accuracy_score(y_train_hot, y_train_pred)
-        # confusion_matrix = confusion_matrix(y_train_hot, y_train_pred)
-
-        print('Train: ', y_train_accuracy)
-        # 0.45
-
-        # Predict labels for test set and assess accuracy
-        y_test_pred = nn_model1.predict(X_test_scaled)
-
-        y_test_accuracy = accuracy_score(y_test_hot, y_test_pred)
-
-        print('Test: ', y_test_accuracy)
-        # 0.533333333333
-        
+        # =========================================================================================
         # Initialize neural network object and fit object
         print('Training Gradient Descent')
         nn_model2 = mlrose.NeuralNetwork(hidden_nodes = [20,20], activation = 'relu', \
@@ -134,4 +172,5 @@ class Part2():
 
         print('Test: ', y_test_accuracy)
         # 0.566666666667
+
 

@@ -182,11 +182,13 @@ def runPart2(savePath):
 
 
 # Main block
-# timestamp = datetime.now().strftime('%b-%d-%y %I:%M:%S %p')
-# path1 = createDateFolder((timestamp, "Part-1"))
-# part1Handler = setLog(path1)
+timestamp = datetime.now().strftime('%b-%d-%y %I:%M:%S %p')
+path1 = createDateFolder((timestamp, "Part-1"))
+part1Handler = setLog(path1)
 
 # runPart1(path1)
 # runPart1_2(path1)
 
-runPart2('')
+path2 = createDateFolder((timestamp, "Part-2"))
+part2Handler = setLog(path2, part1Handler)
+runPart2(path2)
