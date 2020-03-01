@@ -17,8 +17,6 @@ log = logging.getLogger()
 ###
 #    source: https://stackoverflow.com/questions/14115254/creating-a-folder-with-timestamp/14115286
 ###
-
-
 def createDateFolder(suffix=("")):
     mydir = os.path.join(os.getcwd(), 'output', *suffix)
     # print('mydir %s' %mydir)
@@ -32,8 +30,6 @@ def createDateFolder(suffix=("")):
 ###
 #    source: My assignment 1 code
 ###
-
-
 def setLog(path, oldHandler=None):
     if oldHandler != None:
         myLogger.logger.removeHandler(oldHandler)
