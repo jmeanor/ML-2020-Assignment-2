@@ -201,14 +201,14 @@ class Part2():
                     y_train_accuracy = accuracy_score(self.y_train_hot, y_train_pred)
 
                     # Predict labels for test set and assess accuracy
-                    y_test_pred = nn_model1.predict(self.X_test_scaled)
-                    y_test_accuracy = accuracy_score(self.y_test_hot, y_test_pred)
+                    y_validate_pred = nn_model1.predict(self.X_validate_scaled)
+                    y_validate_accuracy = accuracy_score(self.y_validate_hot, y_validate_pred)
 
                     log.info('\tTraining Accuracy,\t %f' %(y_train_accuracy))
-                    log.info('\tTesting Accuracy,\t %f'%y_test_accuracy)
+                    log.info('\tValidation Accuracy,\t %f'%y_validate_accuracy)
                     log.info('\tTraining Time,\t\t %f' %elapsed)
                     esc_layers = ('%s' %layers).replace(",", ";")
-                    vals = '%s,%s,%s,%s,%s,%s,%s,%s,\n' %(algorithm, activation, learning_rate, restarts, esc_layers, y_train_accuracy, y_test_accuracy, elapsed)
+                    vals = '%s,%s,%s,%s,%s,%s,%s,%s,\n' %(algorithm, activation, learning_rate, restarts, esc_layers, y_train_accuracy, y_validate_accuracy, elapsed)
                     csvFile.write(vals)
                     # confusion = confusion_matrix(self.y_train_hot, y_train_pred)
 
