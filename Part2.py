@@ -66,7 +66,7 @@ class Part2():
         h_params = {
             'learning_rates': np.linspace(0.1, .5, 10),
             'max_iters': 100,
-            'activation_functions': ['identity', 'relu', 'sigmoid', 'tanh'],
+            'activation_functions': ['relu'],
             'hidden_layers': [5],
             'restarts': 8
         }
@@ -75,7 +75,7 @@ class Part2():
         h_params = {
             'learning_rates': np.linspace(0.3, .5, 10),
             'max_iters': 100,
-            'activation_functions': ['identity', 'relu', 'tanh'],
+            'activation_functions': ['relu'],
             'hidden_layers': [[5], [10], [5,5]],
             
             # RHC
@@ -87,7 +87,7 @@ class Part2():
         h_params = {
             'learning_rates': np.linspace(0.3, .5, 10),
             'max_iters': 100,
-            'activation_functions': ['identity', 'relu', 'tanh'],
+            'activation_functions': ['relu'],
             'hidden_layers': [[5], [10], [5,5]],
             'restarts': 0,
 
@@ -102,9 +102,9 @@ class Part2():
 
         a = np.array(sa_curve)
         b = np.array(ga_curve)
-        b = np.array(rhc_curve)
+        c = np.array(rhc_curve)
 
-        maxLen = max((len(a), len(b), len(c))
+        maxLen = max((len(a), len(b), len(c)))
         arr = np.zeros((3, maxLen))
 
         arr[0, :len(a)] = a
@@ -128,8 +128,8 @@ class Part2():
         learning_rates          = h_params['learning_rates']
         restarts                = h_params['restarts']
         max_iters               = h_params['max_iters']
-        pop_sizes               = h_params['pop_sizes']
-        mutation_probs           = h_params['mutation_probs']
+        # pop_sizes               = h_params['pop_sizes']
+        # mutation_probs           = h_params['mutation_probs']
         
 
         csvFile = open(os.path.join(self.savePath, algorithm+'_output.csv'), 'w')
@@ -184,10 +184,11 @@ class Part2():
                         best_accuracy = y_validate_accuracy
                         best_training_accuracy = y_train_accuracy
                         best_params = nn_model1.get_params()
-                        best_curve = nn_model1.fitness_curve()
+                        best_curve = nn_model1.fitness_curve
         log.info('\t\t%s - Best validation score: %f, training score: %f, Best Params: %s' %(algorithm, best_validation_accuracy, best_training_accuracy, best_params))
         csvFile.write('\nAlgorithm, Best validation score, Training Score, Best Params,\n')
         esc_params = best_params.replace(",", ";")
         csvFile.write('\n%s, %f, %f, %s' %(algorithm, best_validation_accuracy, best_training_accuracy, esc_params))
         csvFile.close()
+        return best_curve
 
