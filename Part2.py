@@ -81,12 +81,24 @@ class Part2():
             # RHC
             'restarts': 8
         }
-        self.runTrial('random_hill_climb', **h_params)
+        # self.runTrial('random_hill_climb', **h_params)
 
-        # GA
-        pop_size = [50, 100, 200]
-        mutation_prob = np.linspace(0.1, 1, 5)
-        
+        # Hyperparams - Trial Three
+        h_params = {
+            'learning_rates': np.linspace(0.3, .5, 10),
+            'max_iters': 100,
+            'activation_functions': ['identity', 'relu', 'tanh'],
+            'hidden_layers': [[5], [10], [5,5]],
+            'restarts': 0,
+
+            # GA
+            'pop_sizes': [10, 20, 50, 100],
+            'mutation_probs': np.linspace(0.1, 1, 5)
+            
+        }
+        self.runTrial('simulated_annealing', **h_params)
+        self.runTrial('genetic_alg', **h_params)
+
         return
 
         # =========================================================================================
@@ -152,6 +164,9 @@ class Part2():
         learning_rates          = h_params['learning_rates']
         restarts                = h_params['restarts']
         max_iters               = h_params['max_iters']
+        pop_sizes               = h_params['pop_sizes']
+        mutation_probs           = h_params['mutation_probs']
+        
 
         csvFile = open(os.path.join(self.savePath, algorithm+'_output.csv'), 'w')
         header = 'Algorithm, Activation Function, Learning Rate, Restarts, Hidden Layers, Training Accuracy, Testing Accuracy, Training Time\n'
@@ -160,7 +175,7 @@ class Part2():
         for activation in activation_functions:
             for layers in hidden_layers:
                 for learning_rate in learning_rates:
-                    paramString = 'RHC, activation, %s, learning_rate, %f, restarts, 8, hidden_layers, %s' %(activation, learning_rate, layers)
+                    paramString = '%s, activation, %s, learning_rate, %f, restarts, %i, hidden_layers, %s' %(algorithm, activation, learning_rate, restarts, layers)
                     log.info(paramString)
                     # print('Learning rate: ', learning_rate)
                     nn_model1 = mlrose.NeuralNetwork(hidden_nodes = layers, 
@@ -188,11 +203,12 @@ class Part2():
                     # Predict labels for test set and assess accuracy
                     y_test_pred = nn_model1.predict(self.X_test_scaled)
                     y_test_accuracy = accuracy_score(self.y_test_hot, y_test_pred)
-                    # print('Test: ', y_test_accuracy)
+
                     log.info('\tTraining Accuracy,\t %f' %(y_train_accuracy))
                     log.info('\tTesting Accuracy,\t %f'%y_test_accuracy)
                     log.info('\tTraining Time,\t\t %f' %elapsed)
-                    vals = '%s,%s,%s,%s,%s,%s,%s,%s,\n' %(algorithm, activation, learning_rate, restarts, layers, y_train_accuracy, y_test_accuracy, elapsed)
+                    esc_layers = ('%s' %layers).replace(",", ";")
+                    vals = '%s,%s,%s,%s,%s,%s,%s,%s,\n' %(algorithm, activation, learning_rate, restarts, esc_layers, y_train_accuracy, y_test_accuracy, elapsed)
                     csvFile.write(vals)
                     # confusion = confusion_matrix(self.y_train_hot, y_train_pred)
 
