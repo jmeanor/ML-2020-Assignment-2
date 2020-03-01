@@ -81,7 +81,7 @@ class Part2():
             # RHC
             'restarts': 8
         }
-        # self.runTrial('random_hill_climb', **h_params)
+        rhc_curve = self.runTrial('random_hill_climb', **h_params)
 
         # Hyperparams - Trial Three
         h_params = {
@@ -96,64 +96,28 @@ class Part2():
             'mutation_probs': np.linspace(0.1, 1, 5)
             
         }
-        self.runTrial('simulated_annealing', **h_params)
-        self.runTrial('genetic_alg', **h_params)
+        # schedule
+        sa_curve = self.runTrial('simulated_annealing', **h_params)
+        ga_curve = self.runTrial('genetic_alg', **h_params)
 
-        return
+        a = np.array(sa_curve)
+        b = np.array(ga_curve)
+        b = np.array(rhc_curve)
 
-        # =========================================================================================
-        # Initialize neural network object and fit object
-        # print('Training Gradient Descent')
-        # nn_model2 = mlrose.NeuralNetwork(hidden_nodes = [20,20], activation = 'relu', \
-        #                                 algorithm = 'gradient_descent', max_iters = 1000, \
-        #                                 bias = True, is_classifier = True, learning_rate = 0.0001, \
-        #                                 early_stopping = True, clip_max = 5, max_attempts = 100, \
-        #                                 random_state = 3)
+        maxLen = max((len(a), len(b), len(c))
+        arr = np.zeros((3, maxLen))
 
-        # nn_model2.fit(self.X_train_scaled, self.y_train_hot)
+        arr[0, :len(a)] = a
+        arr[1, :len(b)] = b
+        arr[1, :len(c)] = c
 
-        # # Predict labels for train set and assess accuracy
-        # y_train_pred = nn_model2.predict(self.X_train_scaled)
+        arr[0, len(a):maxLen] = a[-1]
+        arr[1, len(b):maxLen] = b[-1]
+        arr[1, len(c):maxLen] = b[-1]
 
-        # y_train_accuracy = accuracy_score(self.y_train_hot, y_train_pred)
+        saveDir = os.path.join(self.savePath, '%s.png' % 'NN Weight Training')
+        graph.plotPart2(arr, saveDir, title='NN Weight Training', isMaximizing=False, xmax=maxLen+5)
 
-        # print('Train: ', y_train_accuracy)
-        # # 0.625
-
-        # # Predict labels for test set and assess accuracy
-        # y_test_pred = nn_model2.predict(self.X_test_scaled)
-
-        # y_test_accuracy = accuracy_score(self.y_test_hot, y_test_pred)
-
-        # print('Test: ', y_test_accuracy)
-        # 0.566666666667
-
-        # =================================================================================
-        # Initialize neural network object and fit object
-        # print('Training Genetic Algorithm')
-        # nn_model2 = mlrose.NeuralNetwork(hidden_nodes = [20,20], activation = 'relu', \
-        #                                 algorithm = 'genetic_alg', max_iters = 1000, \
-        #                                 bias = True, is_classifier = True, learning_rate = 0.0001, \
-        #                                 early_stopping = True, clip_max = 5, max_attempts = 100, \
-        #                                 random_state = 3)
-
-        # nn_model2.fit(self.X_train_scaled, self.y_train_hot)
-
-        # # Predict labels for train set and assess accuracy
-        # y_train_pred = nn_model2.predict(self.X_train_scaled)
-
-        # y_train_accuracy = accuracy_score(self.y_train_hot, y_train_pred)
-
-        # print('Train: ', y_train_accuracy)
-        # # 0.625
-
-        # # Predict labels for test set and assess accuracy
-        # y_test_pred = nn_model2.predict(self.X_test_scaled)
-
-        # y_test_accuracy = accuracy_score(self.y_test_hot, y_test_pred)
-
-        # print('Test: ', y_test_accuracy)
-        # # 0.566666666667
 
     def runTrial(self, algorithm, **h_params):
         # Initialize neural network object and fit object
@@ -171,6 +135,10 @@ class Part2():
         csvFile = open(os.path.join(self.savePath, algorithm+'_output.csv'), 'w')
         header = 'Algorithm, Activation Function, Learning Rate, Restarts, Hidden Layers, Training Accuracy, Testing Accuracy, Training Time\n'
         csvFile.write(header)
+
+        best_validation_accuracy = 0 
+        best_training_accuracy = 0 
+        best_params = None
 
         for activation in activation_functions:
             for layers in hidden_layers:
@@ -212,5 +180,14 @@ class Part2():
                     csvFile.write(vals)
                     # confusion = confusion_matrix(self.y_train_hot, y_train_pred)
 
+                    if (y_validate_accuracy > best_validation_accuracy):
+                        best_accuracy = y_validate_accuracy
+                        best_training_accuracy = y_train_accuracy
+                        best_params = nn_model1.get_params()
+                        best_curve = nn_model1.fitness_curve()
+        log.info('\t\t%s - Best validation score: %f, training score: %f, Best Params: %s' %(algorithm, best_validation_accuracy, best_training_accuracy, best_params))
+        csvFile.write('\nAlgorithm, Best validation score, Training Score, Best Params,\n')
+        esc_params = best_params.replace(",", ";")
+        csvFile.write('\n%s, %f, %f, %s' %(algorithm, best_validation_accuracy, best_training_accuracy, esc_params))
         csvFile.close()
 
