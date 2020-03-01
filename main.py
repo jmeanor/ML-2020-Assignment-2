@@ -174,9 +174,19 @@ def runPart1(savePath):
     # part1.runMIMIC()
 
 
-# Main block
-timestamp = datetime.now().strftime('%b-%d-%y %I:%M:%S %p')
-path1 = createDateFolder((timestamp, "Part-1"))
-part1Handler = setLog(path1)
+def runPart2(savePath):
+    from Part2 import Part2
 
-runPart1(path1)
+    part2 = Part2(savePath)
+    part2.run()
+
+
+# Main block
+# timestamp = datetime.now().strftime('%b-%d-%y %I:%M:%S %p')
+# path1 = createDateFolder((timestamp, "Part-1"))
+# part1Handler = setLog(path1)
+
+# runPart1(path1)
+# runPart1_2(path1)
+
+runPart2('')
