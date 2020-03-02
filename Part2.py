@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import accuracy_score, confusion_matrix
 import time, os
-
+import graph
 # Logging
 import logging
 log = logging.getLogger()
@@ -63,42 +63,87 @@ class Part2():
         self.split_data()
 
         # Hyperparams - Trial One
-        h_params = {
-            'learning_rates': np.linspace(0.1, .5, 10),
-            'max_iters': 100,
-            'activation_functions': ['relu'],
-            'hidden_layers': [5],
-            'restarts': 8
-        }
+        # h_params = {
+        #     'learning_rates': np.linspace(0.1, .5, 10),
+        #     'max_iters': 100,
+        #     'activation_functions': ['relu'],
+        #     'hidden_layers': [[5], [10], [5,5]],
+        #     'restarts': 8
+        # }
 
-        # Hyperparams - Trial Two
-        h_params = {
-            'learning_rates': np.linspace(0.3, .5, 10),
-            'max_iters': 100,
-            'activation_functions': ['relu'],
-            'hidden_layers': [[5], [10], [5,5]],
+        # # Hyperparams - Trial Two
+        # h_params = {
+        #     'learning_rates': np.linspace(0.3, .5, 10),
+        #     'max_iters': 100,
+        #     'activation_functions': ['relu'],
+        #     'hidden_layers': [[5]],
             
-            # RHC
+        #     # RHC
+        #     'restarts': 8
+        # }
+        # # rhc_curve = self.runTrial('random_hill_climb', **h_params)
+
+        # # Hyperparams - Trial Three
+        # h_params = {
+        #     'learning_rates': np.linspace(0.3, .5, 10),
+        #     'max_iters': 100,
+        #     'activation_functions': ['relu'],
+        #     # 'hidden_layers': [[5], [10], [5,5]],
+        #     'hidden_layers': [[5]],
+        #     'restarts': 0,
+
+        #     # GA
+        #     'pop_sizes': [10, 20, 50, 100],
+        #     'mutation_probs': np.linspace(0.1, 1, 5)
+        # }
+        # ga_curve = self.runTrial('genetic_alg', **h_params)
+
+        #  # Hyperparams - Trial Three
+        # h_params = {
+        #     'learning_rates': np.linspace(0.2, .5, 10),
+        #     'max_iters': 1000,
+        #     'activation_functions': ['relu'],
+        #     'hidden_layers': [[5]],
+        #     'restarts': 8,
+
+        #     # GA
+        #     'schedules': [mlrose.GeomDecay(), mlrose.ExpDecay()]
+        # }
+        # sa_curve = self.runTrial('simulated_annealing', **h_params)
+
+        # Optimal Parameters Below
+        rhc_params = {
+            'learning_rates': [0.43333333333333335],
+            'max_iters': 400,
+            'activation_functions': ['relu'],
+            'hidden_layers': [[5]],
             'restarts': 8
         }
-        rhc_curve = self.runTrial('random_hill_climb', **h_params)
 
-        # Hyperparams - Trial Three
-        h_params = {
-            'learning_rates': np.linspace(0.3, .5, 10),
-            'max_iters': 100,
+        ga_params = {
+            'learning_rates': [0.3],
+            'max_iters': 300,
             'activation_functions': ['relu'],
-            'hidden_layers': [[5], [10], [5,5]],
-            'restarts': 0,
-
+            'hidden_layers': [[5]],
+            'restarts': 8,
             # GA
-            'pop_sizes': [10, 20, 50, 100],
-            'mutation_probs': np.linspace(0.1, 1, 5)
-            
+            'pop_sizes': [200],
+            'mutation_probs': [0.1]
         }
-        # schedule
-        sa_curve = self.runTrial('simulated_annealing', **h_params)
-        ga_curve = self.runTrial('genetic_alg', **h_params)
+
+        sa_params = {
+            'learning_rates': [0.43333333333333335],
+            'max_iters': 1000,
+            'activation_functions': ['relu'],
+            'hidden_layers': [[5]],
+            'restarts': 8,
+            'schedules': [mlrose.GeomDecay()]
+        }
+
+        rhc_curve = self.runTrial('random_hill_climb', **rhc_params)
+        sa_curve = self.runTrial('simulated_annealing', **sa_params)
+        ga_curve = self.runTrial('genetic_alg', **ga_params)
+
 
         a = np.array(sa_curve)
         b = np.array(ga_curve)
@@ -113,7 +158,7 @@ class Part2():
 
         arr[0, len(a):maxLen] = a[-1]
         arr[1, len(b):maxLen] = b[-1]
-        arr[1, len(c):maxLen] = b[-1]
+        arr[1, len(c):maxLen] = c[-1]
 
         saveDir = os.path.join(self.savePath, '%s.png' % 'NN Weight Training')
         graph.plotPart2(arr, saveDir, title='NN Weight Training', isMaximizing=False, xmax=maxLen+5)
@@ -130,64 +175,85 @@ class Part2():
         max_iters               = h_params['max_iters']
         # pop_sizes               = h_params['pop_sizes']
         # mutation_probs           = h_params['mutation_probs']
+        if algorithm == 'simulated_annealing':
+            schedules = h_params['schedules']
+        else:
+            schedules = [mlrose.GeomDecay()]
+        if algorithm == 'genetic_alg':
+            pop_sizes = h_params['pop_sizes']
+            mutation_probs = h_params['mutation_probs']
+        else:
+            mutation_probs = [0.1]
+            pop_sizes = [200]
         
 
         csvFile = open(os.path.join(self.savePath, algorithm+'_output.csv'), 'w')
-        header = 'Algorithm, Activation Function, Learning Rate, Restarts, Hidden Layers, Training Accuracy, Testing Accuracy, Training Time\n'
+        header = 'Algorithm, Activation Function, Learning Rate, Restarts, Hidden Layers, Training Accuracy, Validation Accuracy, Training Time\n'
         csvFile.write(header)
 
         best_validation_accuracy = 0 
         best_training_accuracy = 0 
         best_params = None
 
-        for activation in activation_functions:
+        for schedule in schedules:
             for layers in hidden_layers:
                 for learning_rate in learning_rates:
-                    paramString = '%s, activation, %s, learning_rate, %f, restarts, %i, hidden_layers, %s' %(algorithm, activation, learning_rate, restarts, layers)
-                    log.info(paramString)
-                    # print('Learning rate: ', learning_rate)
-                    nn_model1 = mlrose.NeuralNetwork(hidden_nodes = layers, 
-                                                activation = activation, 
-                                                algorithm = algorithm, 
-                                                restarts=restarts,
-                                                max_iters = max_iters,
-                                                bias = True, 
-                                                is_classifier = True, 
-                                                learning_rate = learning_rate, 
-                                                early_stopping = True, 
-                                                clip_max = 5,
-                                                curve=True, 
-                                                max_attempts = 100,
-                                                random_state = 3)
-                    start = time.process_time()
-                    nn_model1.fit(self.X_train_scaled, self.y_train_hot)
-                    elapsed = time.process_time() - start
-                    # log.info('\tElapsed time, %s' %elapsed)
+                    for pop_size in pop_sizes:
+                        for mutation in mutation_probs:
+                            paramString = '%s, activation, %s, learning_rate, %f, restarts, %i, hidden_layers, %s, pop_size, %s, mutation_prob, %s ' %(algorithm, 'relu', learning_rate, restarts, layers, pop_size, mutation)
+                            log.info(paramString)
+                            # print('Learning rate: ', learning_rate)
+                            nn_model1 = mlrose.NeuralNetwork(hidden_nodes = layers, 
+                                                        activation = 'relu', 
+                                                        algorithm = algorithm, 
+                                                        restarts=restarts,
+                                                        max_iters = max_iters,
+                                                        bias = True, 
+                                                        is_classifier = True, 
+                                                        learning_rate = learning_rate, 
+                                                        early_stopping = True, 
+                                                        clip_max = 5,
+                                                        curve=True,
+                                                        schedule=schedule,
+                                                        pop_size=pop_size,
+                                                        mutation_prob=mutation,
+                                                        max_attempts = 100,
+                                                        random_state = 3)
+                            start = time.process_time()
+                            nn_model1.fit(self.X_train_scaled, self.y_train_hot)
+                            elapsed = time.process_time() - start
+                            # log.info('\tElapsed time, %s' %elapsed)
 
-                    # Predict labels for train set and assess accuracy
-                    y_train_pred = nn_model1.predict(self.X_train_scaled)
-                    y_train_accuracy = accuracy_score(self.y_train_hot, y_train_pred)
+                            # Predict labels for train set and assess accuracy
+                            y_train_pred = nn_model1.predict(self.X_train_scaled)
+                            y_train_accuracy = accuracy_score(self.y_train_hot, y_train_pred)
 
-                    # Predict labels for test set and assess accuracy
-                    y_validate_pred = nn_model1.predict(self.X_validate_scaled)
-                    y_validate_accuracy = accuracy_score(self.y_validate_hot, y_validate_pred)
+                            # Predict labels for test set and assess accuracy
+                            y_validate_pred = nn_model1.predict(self.X_validate_scaled)
+                            y_validate_accuracy = accuracy_score(self.y_validate_hot, y_validate_pred)
 
-                    log.info('\tTraining Accuracy,\t %f' %(y_train_accuracy))
-                    log.info('\tValidation Accuracy,\t %f'%y_validate_accuracy)
-                    log.info('\tTraining Time,\t\t %f' %elapsed)
-                    esc_layers = ('%s' %layers).replace(",", ";")
-                    vals = '%s,%s,%s,%s,%s,%s,%s,%s,\n' %(algorithm, activation, learning_rate, restarts, esc_layers, y_train_accuracy, y_validate_accuracy, elapsed)
-                    csvFile.write(vals)
-                    # confusion = confusion_matrix(self.y_train_hot, y_train_pred)
+                            # Predict labels for train set and assess accuracy
+                            y_test_pred = nn_model1.predict(self.X_test_scaled)
+                            y_test_accuracy = accuracy_score(self.y_test_hot, y_test_pred)
 
-                    if (y_validate_accuracy > best_validation_accuracy):
-                        best_accuracy = y_validate_accuracy
-                        best_training_accuracy = y_train_accuracy
-                        best_params = nn_model1.get_params()
-                        best_curve = nn_model1.fitness_curve
-        log.info('\t\t%s - Best validation score: %f, training score: %f, Best Params: %s' %(algorithm, best_validation_accuracy, best_training_accuracy, best_params))
+                            log.info('\tTraining Accuracy,\t %f' %(y_train_accuracy))
+                            log.info('\tValidation Accuracy,\t %f'%y_validate_accuracy)
+                            log.info('\Test Accuracy,\t %f'%y_test_accuracy)
+                            log.info('\tTraining Time,\t\t %f' %elapsed)
+                            esc_layers = ('%s' %layers).replace(",", ";")
+                            vals = '%s,%s,%s,%s,%s,%s,%s,%s,\n' %(algorithm, 'relu', learning_rate, restarts, esc_layers, y_train_accuracy, y_validate_accuracy, elapsed)
+                            csvFile.write(vals)
+                            # confusion = confusion_matrix(self.y_train_hot, y_train_pred)
+
+                            if (y_validate_accuracy > best_validation_accuracy):
+                                best_validation_accuracy = y_validate_accuracy
+                                best_training_accuracy = y_train_accuracy
+                                best_params = nn_model1.get_params()
+                                best_curve = nn_model1.fitness_curve
+                                best_weights = nn_model1.fitted_weights
+        log.info('\t\t%s - Best validation score: %f, training score: %f, Best Params: %s, Best Weights: %s' %(algorithm, best_validation_accuracy, best_training_accuracy, best_params, best_weights))
         csvFile.write('\nAlgorithm, Best validation score, Training Score, Best Params,\n')
-        esc_params = best_params.replace(",", ";")
+        esc_params = ('%s' %best_params).replace(",", ";")
         csvFile.write('\n%s, %f, %f, %s' %(algorithm, best_validation_accuracy, best_training_accuracy, esc_params))
         csvFile.close()
         return best_curve
